@@ -1,0 +1,190 @@
+using olxadmin.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace olxadmin.Controllers
+{
+    public class HomeController : Controller
+    {
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        public ActionResult About()
+        {
+            ViewBag.Message = "Your application description page.";
+
+            return View();
+        }
+
+        public ActionResult Contact()
+        {
+            ViewBag.Message = "Your contact page.";
+
+            return View();
+        }
+        public ActionResult InsertProductDetail(AddlistModel model) // Assuming AddlistModel is your model for form input
+        {
+            try
+            {
+                RepoModel repo = new RepoModel();
+
+                // Call the InsertProductDetail method in your repository to insert the product
+                bool insertionResult = repo.InsertProductDetail(model);
+
+                if (insertionResult)
+                {
+                    // The insertion was successful, redirect to the index or a success page
+                    ViewBag.SuccessMessage = "Data has been inserted successfully.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    // The insertion failed, you might want to handle this case or display an error message
+                    return View(); // You might want to return an error view or display a message here
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log or handle the exception
+                Console.WriteLine("Error inserting product detail: " + ex.Message);
+                return View(); // Handle the exception gracefully, you might want to display an error view or message
+            }
+        }
+    }
+    }
+-----------------------------------------repo----
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+
+namespace olxadmin.Models
+{
+    public class RepoModel
+    {
+        public bool InsertProductDetail(AddlistModel model)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["connection"].ToString()))
+                {
+                    connection.Open();
+
+                    using (SqlCommand cmd = new SqlCommand("InsertProductDetail", connection))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        // Make sure the parameter names match the stored procedure
+                        cmd.Parameters.AddWithValue("@ProductTitle", model.ProductTitle);
+                        cmd.Parameters.AddWithValue("@ProductDescription", model.ProductDescription);
+                        cmd.Parameters.AddWithValue("@ProductPrice", model.ProductPrice);
+                        cmd.Parameters.AddWithValue("@ProductStatus", model.ProductStatus);
+                        cmd.Parameters.AddWithValue("@ProductImageId", model.IFormFile);
+                        cmd.Parameters.AddWithValue("@CityId", model.CityId);
+                        cmd.Parameters.AddWithValue("@UserId", model.UserId);
+
+                        int affectedRows = cmd.ExecuteNonQuery();
+
+                        // Check if the insert operation was successful
+                        return affectedRows > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log or handle the exception
+                Console.WriteLine("Error inserting product detail: " + ex.Message);
+                return false; // Return false to indicate failure
+            }
+        }
+    }
+}
+
+
+
+-------------------model---------
+using System;
+
+namespace olxadmin.Models
+{
+    public class AddlistModel
+    {
+        public int ProductDetailsId { get; set; }
+
+        public string ProductTitle { get; set; }
+
+        public string ProductDescription { get; set; }
+
+        public float ProductPrice { get; set; }
+
+        public string IFormFile { get; set; }
+
+        public int CityId { get; set; }
+
+        public bool ProductStatus { get; set; }
+
+        public int UserId { get; set; }
+
+        public DateTime CreatedOn { get; set; }
+
+        public DateTime UpdatedOn { get; set; }
+    }
+}
+-------------------html------------------
+@model  List<olxadmin.Models.AddlistModel>
+
+<!-- Main Content Area -->
+@if (ViewBag.SuccessMessage != null)
+{
+    <div class="alert alert-success">@ViewBag.SuccessMessage</div>
+}
+<main>
+    <h1>Manage Ads</h1>
+
+    <!-- List of Ads -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ad in Model)
+            {
+                <tr>
+                    <td>@ad.ProductDetailsId</td>
+                    <td><img src="@Url.Content("~/Images/" + ad.IFormFile + ".jpg")" alt="Ad Image" width="100"></td>
+                    <td>@ad.ProductTitle</td>
+                    <td>@ad.ProductDescription</td>
+                    <td>@ad.ProductPrice</td>
+                    <td>@(ad.ProductStatus ? "Active" : "Inactive")</td>
+                    @*<td>
+                            <a href="@Url.Action("EditAd", new { id = ad.ProductDetailsId })">Edit</a>
+                            <a href="@Url.Action("ApproveAd", new { id = ad.ProductDetailsId })">Approve</a>
+                            <a href="@Url.Action("RejectAd", new { id = ad.ProductDetailsId })">Reject</a>
+                        </td>*@
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Add New Ad Button -->
+    <div class="add-ad-button">
+        <a href="#">Add New Ad</a>
+    </div>
+</main>
