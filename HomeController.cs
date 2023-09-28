@@ -78,12 +78,63 @@ namespace OlxDemo.Controllers
                 return View();
             }
         }
-
-
-
-
-
-
-
     }
 }
+--====================================================
+[HttpPost]
+        public ActionResult Registration(RegistrationModel model)
+        {
+            RegistrationRepo repo = new RegistrationRepo();
+
+            var isemailalreadyexists = repo.IsEmailAlreadyExists(model.@userEmail);
+
+            if (isemailalreadyexists)
+            {
+                ModelState.AddModelError("useremail", "this email already exists.");
+
+            }
+            else
+            {
+                bool registrationResult = repo.InsertUser(model);
+
+                if (registrationResult)
+                {
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Registration failed. Please try again.");
+                    return View(model);
+                }
+
+            }
+            return View(model);
+
+        }
+        
+            //        [HttpPost]
+            //public ActionResult Registration(RegistrationModel obj)
+            //{
+            //    try
+            //    {
+            //        RegistrationRepo repo = new RegistrationRepo();
+            //        // TODO: Add insert logic here
+            //        repo.InsertUser(obj);
+            //        //ViewBag.success = "data inserted";
+
+            //        return RedirectToAction(nameof(Index));
+            //    }
+            //    catch (Exception)
+            //    {
+            //        return View();
+            //    }
+            // }
+
+            //public ActionResult Addlist()
+            //{
+            //    return View();
+            //}
+        }
+
+    }
+
