@@ -187,4 +187,79 @@ namespace olxadmin.Models
     <div class="add-ad-button">
         <a href="#">Add New Ad</a>
     </div>
-</main>
+</main>----_-++++++++++@model IEnumerable<OLXProject.Models.MyAdvertiseModel>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    <a href="@Url.Action("Create")">Create New</a>
+</p>
+
+<table class="table">
+    <tr>
+        <th>Advertise ID</th>
+        <th>Product Subcategory ID</th>
+        <th>Advertise Title</th>
+        <th>Advertise Description</th>
+        <th>Advertise Price</th>
+        <th>Area ID</th>
+        <th>Advertise Status</th>
+        <th>User ID</th>
+        <th>Advertise Approved</th>
+        <th>Created On</th>
+        <th>Updated On</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.advertiseId)</td>
+            <td>@Html.DisplayFor(modelItem => item.productSubCategoryId)</td>
+            <td>@Html.DisplayFor(modelItem => item.advertiseTitle)</td>
+            <td>@Html.DisplayFor(modelItem => item.advertiseDescription)</td>
+            <td>@Html.DisplayFor(modelItem => item.advertisePrice)</td>
+            <td>@Html.DisplayFor(modelItem => item.areaId)</td>
+            <td>@Html.DisplayFor(modelItem => item.advertiseStatus)</td>
+            <td>@Html.DisplayFor(modelItem => item.userId)</td>
+            <td>@Html.DisplayFor(modelItem => item.advertiseapproved)</td>
+            <td>@Html.DisplayFor(modelItem => item.createdOn)</td>
+            <td>@Html.DisplayFor(modelItem => item.updatedOn)</td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.advertiseId }) |
+                @Html.ActionLink("Details", "Details", new { id = item.advertiseId }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.advertiseId })
+            </td>
+        </tr>
+    }
+</table>
+
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    a {
+        color: #007bff;
+        text-decoration: none;
+    }
+</style>
