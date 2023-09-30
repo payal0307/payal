@@ -263,3 +263,202 @@ namespace olxadmin.Models
         text-decoration: none;
     }
 </style>
+30/09/2023-----------------------
+@model IEnumerable<demo.Models.MyAdvertise>
+
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>AdvertiseId</th>
+        <th>CategoryName</th>
+        <th>AdvertiseTitle</th>
+        <th>AdvertiseDescription</th>
+        <th>AdvertisePrice</th>
+        <th>City</th>
+        <th>AdvertiseStatus</th>
+        <th>UserName</th>
+        <th>Advertiseapproved</th>
+
+    </tr>
+   
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.advertiseId</td>
+            
+            <td>@item.advertiseTitle</td>
+            <td>@item.advertiseDescription</td>
+            <td>@item.advertisePrice</td>
+           
+            <td>@item.advertiseStatus</td>
+            
+            <td>@item.advertiseapproved</td>
+            <td>
+                @Html.ActionLink("Approve", "Approve", new { id = item.advertiseId }, new { @class = "btn btn-success" })
+                @Html.ActionLink("Reject", "Reject", new { id = item.advertiseId }, new { @class = "btn btn-danger" })
+            </td>
+        </tr>
+    }
+</table>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace demo.Models
+{
+    public class MyAdvertise
+    {
+        public int advertiseId { get; set; }
+        public List<ProductSubCategory> productsubcat { get; set; }
+        public string advertiseTitle { get; set; }
+        public string advertiseDescription { get; set; }
+        public string advertisePrice { get; set; }
+        public int areaId { get; set; }
+        public string advertiseStatus { get; set; }
+        public List<Users> users { get; set; }
+        public string advertiseapproved { get; set; }
+        
+
+    }
+    public class ProductSubCategory
+    {
+        public int productSubCategoryId { get; set; }
+        public string productCategoryId { get; set; }
+        public string productSubCategoryName { get; set; }
+
+    }
+    public class Users
+    {
+        public int userId { get; set; }
+
+        //// [Required(ErrorMessage = "Please Enter FirstName")]
+        public string firstName { get; set; }
+
+        //// [Required(ErrorMessage = "Please Enter LastName")]
+        public string lastName { get; set; }
+
+        ////  [Required(ErrorMessage = "Email Id is required.")]
+        //// [RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", ErrorMessage = "Invalid email format.")]
+        public string userEmail { get; set; }
+
+        ////[Required(ErrorMessage = "Please Enter Password")]
+        ////[DataType(DataType.Password)]
+        //// [StringLength(100, ErrorMessage = "Password \"{0}\" must have {2} character", MinimumLength = 8)]
+        //[RegularExpression(@"^([a-zA-Z0-9@*#]{8,15})$", ErrorMessage = "Password must contain: Minimum 8 characters atleast 1 " +
+        //"UpperCase, LowerCase, Number, Special Character")]
+        //"UpperCase, LowerCase, Number, Special Character")]
+        public string Password { get; set; }
+
+        //[DataType(DataType.PhoneNumber)]
+        // [Display(Name = "MobileNo")]
+        //[Required(ErrorMessage = "Phone Number Required!")]
+        // [RegularExpression(@"^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$", ErrorMessage = "Entered phone format is not valid.")]
+        public string MobileNo { get; set; }
+
+        //Required(ErrorMessage = "Please Select the gender")]
+        public string Gender { get; set; }
+
+        //[Required(ErrorMessage = "The Address field is required")]
+        public string Address { get; set; }
+
+        // [Required(ErrorMessage = "Please select a city")]
+        public string City { get; set; }
+        //public string Role { get; set; } = "0";
+
+        //[Required(ErrorMessage = "Please enter Security Answer")]
+        //[Display(Name = "SecurityAnswer")]
+        //public string SecurityAnswer { get; set; }
+
+    }
+}
+        [HttpPost]
+        public ActionResult addlist(MyAdvertise ads)
+        {
+            adslistRepo adsModel = new adslistRepo();
+            adsModel.GetadsFromDatabase();
+            adsModel.Getuser();
+            return View(ads);
+        }
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+
+namespace demo.Models
+{
+    public class adslistRepo
+    {
+        public List<MyAdvertise> GetadsFromDatabase()
+        {
+            SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ToString());
+            List<MyAdvertise> adsList = new List<MyAdvertise>();
+
+            string query = "SELECT p.advertiseId, p.advertiseTitle, p.advertiseDescription, p.advertisePrice, a.advertiseStatus, u.firstName " +
+                           "FROM tbl_MyAdvertise p " +
+                           "INNER JOIN tbl_Users u ON p.userId = u.userId " +
+                           "INNER JOIN tbl_Areas a ON p.areaId = a.areaId";
+
+            SqlCommand command = new SqlCommand(query, sqlConnection);
+            sqlConnection.Open();
+            SqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                MyAdvertise product = new MyAdvertise()
+                {
+                    advertiseId = Convert.ToInt32(reader["advertiseId"]),
+                    advertiseTitle = Convert.ToString(reader["advertiseTitle"]),
+                    advertiseDescription = Convert.ToString(reader["advertiseDescription"]),
+                    advertisePrice = Convert.ToString(reader["advertisePrice"]),
+                    advertiseStatus = Convert.ToString(reader["advertiseStatus"]),
+                    
+                };
+
+                adsList.Add(product);
+            }
+
+            sqlConnection.Close();
+            return adsList;
+        }
+        public List<Users> Getuser()
+        {
+            SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ToString());
+            List<Users> adsList = new List<Users>();
+
+            string query = "SELECT p.advertiseId, p.advertiseTitle, p.advertiseDescription, p.advertisePrice, a.advertiseStatus, u.firstName " +
+                           "FROM tbl_MyAdvertise p " +
+                           "INNER JOIN tbl_Users u ON p.userId = u.userId " +
+                           "INNER JOIN tbl_Areas a ON p.areaId = a.areaId";
+
+            SqlCommand command = new SqlCommand(query, sqlConnection);
+            sqlConnection.Open();
+            SqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Users product = new Users()
+                {
+                    firstName = Convert.ToString(reader["firstName"])
+                };
+
+                adsList.Add(product);
+            }
+
+            sqlConnection.Close();
+            return adsList;
+        }
+
+
+    }
+}
+
+    
+
+
